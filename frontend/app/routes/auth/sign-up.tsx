@@ -21,8 +21,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
+import { useSignUpMutation } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
-type SignUpFormData = z.infer<typeof signUpSchema>;
+export type SignUpFormData = z.infer<typeof signUpSchema>;
 
 function SignUp() {
   // hook to manage form state and validation
@@ -36,8 +38,20 @@ function SignUp() {
     },
   });
 
+  const { mutate, isPending } = useSignUpMutation(); // custom hook to handle sign-up mutation, isPending is a boolean that indicates if the mutation is in progress
+
   const handleOnSubmit = (values: SignUpFormData) => {
-    console.log(values);
+    mutate(values, {
+      onSuccess: (data) => {
+        toast.success("Account created successfully! Please log in.");
+      },
+      onError: (error) => {
+        // return res.data.message
+
+        toast.error(error.message || "Something went wrong during sign-up.");
+        console.error("Error during sign-up:", error);
+      },
+    });
   };
 
   return (
@@ -125,8 +139,8 @@ function SignUp() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Login
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? "Creating Account..." : "Sign Up"}
               </Button>
             </form>
           </Form>

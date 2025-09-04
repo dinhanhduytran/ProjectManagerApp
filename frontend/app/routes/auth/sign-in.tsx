@@ -35,7 +35,7 @@ function SignIn() {
   });
 
   const handleOnSubmit = (values: SignInFormData) => {
-    console.log(values);
+    console.log("values", values);
   };
 
   return (
