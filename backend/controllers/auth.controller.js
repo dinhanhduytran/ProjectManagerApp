@@ -3,10 +3,20 @@ import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import Verification from "../models/verification.model.js";
 import { sendEmail } from "../libs/sendEmail.ts";
+import aj from "../libs/arcjet.ts";
 
 const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    const decision = await aj.protect(req, { requested: 1, email }); // Pass user email for context
+
+    if (decision.isDenied()) {
+      if (decision.reason.isEmail()) {
+        res.writeHead(403, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Invalid Email Address" }));
+      }
+    } // Handle other denial reasons if needed
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
