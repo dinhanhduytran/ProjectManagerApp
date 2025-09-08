@@ -20,9 +20,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link, Navigate, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useSignUpMutation } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { useAuth } from "@/providers/auth-context";
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 
@@ -38,6 +39,7 @@ function SignUp() {
       confirmPassword: "",
     },
   });
+  const { login } = useAuth();
 
   const { mutate, isPending } = useSignUpMutation(); // custom hook to handle sign-up mutation, isPending is a boolean that indicates if the mutation is in progress
 

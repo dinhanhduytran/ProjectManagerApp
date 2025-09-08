@@ -14,7 +14,8 @@ const userSchema = new Schema(
       type: String,
       required: true,
       minlength: 8,
-      select: false, // Exclude password field by default when querying
+      select: false, // Exclude password field by default when querying, event
+      // use + .select('+password') to include it
     },
     username: {
       type: String,
@@ -65,6 +66,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  console.log("Comparing passwords:", candidatePassword, this.password);
   return bcrypt.compare(candidatePassword, this.password);
 };
 

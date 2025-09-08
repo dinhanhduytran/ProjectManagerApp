@@ -5,6 +5,7 @@ import { Link, useSearchParams } from "react-router";
 import { Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useVerifyEmailMutation } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 function VerifyEmail() {
   const [searchParams] = useSearchParams();
@@ -24,8 +25,14 @@ function VerifyEmail() {
             setIsSuccess(true);
           },
           onError: (error) => {
+            const errorMessage =
+              (error as any)?.response?.data?.message || error.message;
             setIsSuccess(false);
             console.error("Error verifying email:", error);
+            toast.error(errorMessage, {
+              description:
+                "There was an issue verifying your email. Please try again.",
+            });
           },
         }
       );
@@ -38,23 +45,18 @@ function VerifyEmail() {
       <p className="text-sm text-slate-500 mb-4">Verify your email...</p>
 
       <Card className="w-full max-w-md">
-        <CardHeader className="">
-          <Link to="/sign-in" className="flex items-center text-sm">
-            <ArrowLeft className="w-4 h-4 mr-2 inline" />
-            Back to Sign In
-          </Link>
-        </CardHeader>
+        <CardHeader className=""></CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-6 space-y-2">
             {/* Show loading spinner while verifying */}
-            {isVerifying ? (
+            {isVerifying ? ( // show loading spinner while verifying
               <>
                 <Loader className="w-10 h-10 text-slate-500 animate-spin mb-4" />
                 <p className="text-sm text-primary text-center ">
                   Please wait while we verify your email...
                 </p>
               </>
-            ) : isSuccess ? (
+            ) : isSuccess ? ( // show success message if verified
               <>
                 <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
                 <h3 className="text-lg font-semibold">Email Verified</h3>
@@ -68,6 +70,7 @@ function VerifyEmail() {
                 </Link>
               </>
             ) : (
+              // show error message if not verified
               <>
                 <XCircle className="w-10 h-10 text-red-500 mb-4" />
                 <h3 className="text-lg font-semibold">Email Not Verified</h3>

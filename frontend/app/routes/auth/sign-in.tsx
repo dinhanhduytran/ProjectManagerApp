@@ -21,6 +21,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
+import { useLogInMutation } from "@/hooks/use-auth";
+import { toast } from "sonner";
+import { useAuth } from "@/providers/auth-context";
+import { Loader2 } from "lucide-react";
 
 type SignInFormData = z.infer<typeof signInSchema>;
 
@@ -33,9 +37,30 @@ function SignIn() {
       password: "",
     },
   });
+  const { login } = useAuth();
+
+  const { mutate, isPending } = useLogInMutation(); // custom hook to handle sign-in mutation, isPending is a boolean that indicates if the mutation is in progress
 
   const handleOnSubmit = (values: SignInFormData) => {
-    console.log("values", values);
+    mutate(values, {
+      onSuccess: (data) => {
+        login(data);
+        console.log("data", data);
+        toast.success("Logged in successfully!", {
+          description: "Welcome back to Planora.",
+        });
+        form.reset(); // reset the form after successful submission
+        window.location.href = "/dashboard"; // redirect to dashboard
+      },
+      onError: (error) => {
+        const errorMessage =
+          (error as any)?.response?.data?.message || error.message;
+        toast.error(errorMessage, {
+          description: "There was an issue logging in. Please try again.",
+        });
+        console.error("Error during sign-in:", error);
+      },
+    });
   };
 
   return (
@@ -97,8 +122,8 @@ function SignIn() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Login
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? <Loader2 className="w-4 h-4 mr-2" /> : "Login"}
               </Button>
             </form>
           </Form>

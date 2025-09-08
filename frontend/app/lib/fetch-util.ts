@@ -27,7 +27,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle 401 Unauthorized errors globally
+    // Handle 401 Unauthorized errors when the token is invalid or expired
     if (error.response && error.response.status === 401) {
       window.dispatchEvent(new Event("force-logout"));
     }

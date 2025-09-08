@@ -15,6 +15,6 @@ const router = e.Router();
 
 router.post("/register", validateData(signUpSchema), registerUser);
 router.post("/login", validateData(signInSchema), loginUser);
-router.post("./verify-email", validateData(veriryEmailSchema), verifyEmail);
+router.post("/verify-email", validateData(veriryEmailSchema), verifyEmail);
 
 export default router;
