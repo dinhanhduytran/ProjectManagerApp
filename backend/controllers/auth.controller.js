@@ -8,12 +8,15 @@ import aj from "../libs/arcjet.ts";
 const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    console.log(email);
     const decision = await aj.protect(req, { requested: 1, email }); // Pass user email for context
-
+    console.log(decision.isDenied());
+    console.log("decision", decision);
     if (decision.isDenied()) {
       if (decision.reason.isEmail()) {
         res.writeHead(403, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ message: "Invalid Email Address" }));
+        console.log("hi");
       }
     } // Handle other denial reasons if needed
 
@@ -76,4 +79,39 @@ const loginUser = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser };
+const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (!payload) return res.status(401).json({ message: "Unauthorized" });
+
+    const { id, property } = payload;
+    if (property !== "email-verification")
+      return res.status(400).json({ message: "Invalid Token" });
+    // Find the verification record
+    const verificationRecord = await Verification.findOne({
+      userId: id,
+      token,
+    });
+    if (!verificationRecord)
+      return res.status(400).json({ message: "Invalid or Expired Token" });
+    // Check if token is expired
+    const isTokenExpired = verificatinRecord.expiredAt < Date.now();
+    if (isTokenExpired)
+      return res.status(400).json({ message: "Token has expired" });
+    // Verify the user's email
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    user.isVerified = true;
+    await user.save();
+    // Delete the verification record after successful verification (for cleanup)
+    await Verification.findByIdAndDelete(verificationRecord._id);
+    res.status(200).json({ message: "Email verified successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export { registerUser, loginUser, verifyEmail };

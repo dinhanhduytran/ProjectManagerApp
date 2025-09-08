@@ -20,13 +20,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 import { useSignUpMutation } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 
 function SignUp() {
+  const navigate = useNavigate();
   // hook to manage form state and validation
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema), // using zod for validation, resolver is a function that handles validation
@@ -43,11 +44,13 @@ function SignUp() {
   const handleOnSubmit = (values: SignUpFormData) => {
     mutate(values, {
       onSuccess: (data) => {
-        toast.success("Account created successfully! Please log in.");
+        toast.success("Email Verification link sent!", {
+          description: "Please check your email to verify your account.",
+        });
+        form.reset(); // reset the form after successful submission
+        navigate("/verify-email"); // redirect to email verification page
       },
       onError: (error) => {
-        // return res.data.message
-
         toast.error(error.message || "Something went wrong during sign-up.");
         console.error("Error during sign-up:", error);
       },

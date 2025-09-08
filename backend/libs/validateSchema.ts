@@ -16,3 +16,7 @@ export const signUpSchema = z
     message: "Passwords do not match", // error message if passwords don't match
     path: ["confirmPassword"], // set the error on the confirmPassword field
   });
+
+export const veriryEmailSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+});
